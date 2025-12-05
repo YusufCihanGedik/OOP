@@ -3,7 +3,7 @@
 **Öğrenci:** Yusuf Cihan GEDİK  
 **Öğrenci No:** Y245060014  
 **Ders:** Nesneye Dayalı Programlama  
-**Durum:** Taslak Aşamasında (WIP) 
+**Durum:** Taslak Aşamasında (WIP) - %50 Tamamlandı
 
 ---
 
@@ -14,56 +14,74 @@
 * **Yıl:** 2024
 * **DOI:** 10.1002/spe.3241
 * **İndeks:** SCI-Expanded
-* **İnceleme Tarihi:** 05.12.2024
+* **İnceleme Tarihi:** 06.12.2024
 
 ---
 
 ## 2. Problem Tanımı ve Motivasyon
-Yazılım endüstrisinde sistemler karmaşıklaştıkça, geleneksel **Monolitik (Monolithic)** mimarilerin sürdürülebilirliği zorlaşmaktadır. Makalede vurgulandığı üzere, monolitik yapılarda tüm işlevlerin tek bir kod tabanında (single codebase) toplanması ve bileşenlerin **"Sıkı Bağlı" (Tightly Coupled)** olması şu sorunlara yol açmaktadır:
-* Küçük bir değişiklikte tüm sistemin yeniden derlenmesi gerekliliği.
-* Ölçeklenebilirlik (scalability) sorunları; tek bir modül için tüm sunucuyu büyütme zorunluluğu.
-* Hata toleransının düşük olması; bir modüldeki hatanın tüm sistemi çökertmesi.
+Yazılım endüstrisinde sistemler karmaşıklaştıkça, geleneksel **Monolitik (Monolithic)** mimarilerin sürdürülebilirliği zorlaşmaktadır. Makalede detaylandırıldığı üzere, monolitik yapılarda tüm işlevlerin tek bir kod tabanında (single codebase) toplanması ve bileşenlerin **"Sıkı Bağlı" (Tightly Coupled)** olması şu kritik sorunlara yol açmaktadır:
+* **Derleme ve Dağıtım Sorunları:** Küçük bir kod değişikliğinde bile tüm uygulamanın yeniden derlenmesi ve test edilmesi gerekliliği.
+* **Ölçeklenebilirlik (Scalability) Kısıtları:** Sistemin sadece belirli bir modülü yoğun yük altında kalsa bile, tüm sunucunun (gereksiz kaynak kullanımıyla) ölçeklendirilmek zorunda kalınması.
+* **Teknoloji Bağımlılığı:** Tüm sistemin tek bir dil veya framework'e mahkum olması, yeni teknolojilerin denenmesini engellemesi.
 
-Mikroservis Mimarisi (MSA) bu sorunlara çözüm getirse de, literatürde ve endüstride standart bir uygulama rehberinin (Reference Architecture) eksikliği, geliştiricilerin şu konularda zorlanmasına neden olmaktadır:
-1.  **Servis Sınırlarının Belirlenmesi (Service Boundaries):** Domain'in nasıl parçalanacağı.
-2.  **Veri Tutarlılığı (Data Consistency):** Dağıtık veritabanlarında tutarlılığın sağlanması (SAGA vb.).
-3.  **Orkestrasyon ve İzlenebilirlik (Orchestration & Distributed Tracing).**
-
-**Makalenin Amacı:** Hem akademik literatürü hem de endüstriyel pratikleri birleştirerek, uygulanabilir ve doğrulanmış bir **Mikroservis Referans Mimarisi** sunmaktır.
+Mikroservis Mimarisi (MSA) bu sorunlara **"Gevşek Bağlılık" (Loose Coupling)** ve **"Yüksek Bütünlük" (High Cohesion)** ile çözüm getirse de, endüstride standart bir uygulama rehberinin eksikliği geliştiricileri; servis sınırlarının belirlenmesi, veri tutarlılığı ve dağıtık hata ayıklama konularında zorlamaktadır.
 
 ---
 
-## 3. Metodoloji ve Yaklaşım (Methodology)
-Makale yazarları, referans mimariyi oluşturmak için **Hibrit ve Alan Odaklı (Domain-Driven)** bir yaklaşım izlemiştir. Süreç şu aşamalardan oluşmaktadır:
+## 3. Metodoloji: Hibrit ve Alan Odaklı Yaklaşım
+Makale yazarları, referans mimariyi oluşturmak için **Alan Mühendisliği (Domain Engineering)** yöntemlerini kullanmıştır. Süreç üç ana aşamadan oluşur:
 
 ### A. Endüstriyel Satıcı Analizi (Vendor Analysis)
-Sadece teorik bilgiyle yetinilmemiş, bulut bilişim devlerinin sunduğu mimari çözümler incelenmiştir:
-* **Amazon Web Services (AWS)**
-* **Google Cloud Platform (GCP)**
-* **Microsoft Azure**
-* *Bulgu:* Her ne kadar terminolojiler farklı olsa da (örn: AWS Lambda vs Azure Functions), sunulan temel bileşenlerin (API Gateway, Service Discovery, Load Balancer) ortak olduğu tespit edilmiştir.
+Sadece teorik bilgiyle yetinilmemiş, **AWS, Google Cloud ve Microsoft Azure** gibi dev sağlayıcıların sunduğu mimari çözümler karşılaştırmalı olarak analiz edilmiştir.
+* *Sonuç:* İsimlendirmeler farklı olsa da (örn: AWS SQS vs Azure Service Bus), temel yapı taşlarının (Messaging, API Gateway, Orchestration) ortak olduğu saptanmıştır.
 
-### B. Alan Modellemesi (Feature Modeling)
-Mikroservis mimarisinin özellikleri **"Zorunlu" (Mandatory)** ve **"Opsiyonel" (Optional)** olarak sınıflandırılmıştır.
-* *Örnek:* "Service Discovery" zorunlu bir özellik iken, "Circuit Breaker" deseni opsiyonel bir dayanıklılık (resilience) modülü olarak modellenmiştir.
-
-### C. Doğrulama: Vaka Çalışmaları (Multi-Case Study)
-Önerilen mimari sadece kağıt üzerinde bırakılmamış, iki farklı gerçek dünya senaryosunda test edilmiştir:
-1.  **Ulaşım Yönetim Sistemi (Transportation Management System):** Lojistik süreçlerinin yönetimi.
-2.  **Uzaktan Ekip Yönetimi (Remote Team Management):** Dağıtık ekiplerin performans takibi.
+### B. Özellik Modellemesi (Feature Modeling)
+MSA'nın bileşenleri bir "Özellik Ağacı" (Feature Diagram) üzerinde modellenmiştir. Özellikler şu şekilde sınıflandırılmıştır:
+* **Zorunlu (Mandatory):** Service Discovery, API Gateway.
+* **Opsiyonel (Optional):** Circuit Breaker, Distributed Tracing.
+* **Alternatifli (XOR):** İletişim yöntemi olarak "Senkron" (REST) veya "Asenkron" (Messaging) seçimi.
 
 ---
 
-## 4. OOP ve Tasarım Desenleri ile İlk İlişkiler
-*(Ön inceleme notlarıdır, detaylandırılacak)*
-Makalede geçen kavramlar, OOP prensipleriyle doğrudan örtüşmektedir:
-* **Decomposition (Ayrıştırma):** "Single Responsibility Principle" (Tek Sorumluluk Prensibi) ilkesinin mimari seviyedeki uygulamasıdır.
-* **Encapsulation (Kapsülleme):** Her mikroservis kendi veritabanına sahiptir (Database per Service), dışarıdan doğrudan erişim engellenmiştir.
-* **Interfaces (Arayüzler):** Servisler birbirlerinin iç yapısını bilmez, sadece API kontratları (Interface) üzerinden haberleşir.
+## 4. Önerilen Referans Mimarinin Detaylı Analizi
+*(Bu bölüm, makaledeki "Decomposition View" ve "Layered View" incelenerek oluşturulmuştur.)*
+
+Önerilen mimari, sistemi yatay katmanlara ve dikey modüllere ayırarak yönetilebilirliği artırmayı hedefler. Kritik bileşenler şunlardır:
+
+### 4.1. İletişim ve Giriş Katmanı (Communication)
+* **API Gateway:** İstemciler ile servisler arasındaki tek giriş noktasıdır. Yönlendirme, kimlik doğrulama ve protokol dönüşümü (HTTPS -> HTTP) yapar.
+* **Senkron vs Asenkron:** Servisler arası iletişimde REST/gRPC (Senkron) veya Message Broker (Asenkron) yapıları tanımlanmıştır.
+
+### 4.2. Veri Yönetimi ve Tutarlılık (Data Management)
+Monolitik yapıdaki "Ortak Veritabanı" yerine, **Database-per-Service** (Her servise özel veritabanı) deseni benimsenmiştir. Dağıtık veri tutarlılığı için ise şu desenler önerilmiştir:
+* **SAGA Pattern:** Uzun süreli işlemleri yönetmek için telafi edici (compensating) transaction'lar kullanılır.
+* **CQRS (Command Query Responsibility Segregation):** Okuma ve yazma işlemlerinin farklı modeller üzerinden yapılması.
+
+### 4.3. Dayanıklılık ve Hata Toleransı (Resilience)
+Dağıtık sistemlerde ağ hataları kaçınılmaz olduğu için şu koruma mekanizmaları mimariye eklenmiştir:
+* **Circuit Breaker:** Hatalı bir servise giden trafiği keserek sistemin geri kalanını korur.
+* **Bulkhead Pattern:** Sistem kaynaklarını izole ederek bir arızanın yayılmasını engeller.
+
+### 4.4. Gözlemlenebilirlik (Observability)
+Sistemin sağlığını izlemek için **Distributed Tracing** (Dağıtık İzleme), **Log Aggregation** (Log Toplama) ve **Health Check** modülleri zorunlu kılınmıştır.
+
+---
+
+## 5. Nesneye Dayalı Programlama (OOP) ile İlişkiler
+Makaledeki mimari kararlar, OOP prensiplerinin sistem tasarımına yansımasıdır:
+
+### 5.1. Modülerlik ve Encapsulation (Kapsülleme)
+Makalede servislerin "Business Capability" (İş Yeteneği) bazında ayrıştırılması gerektiği belirtilmiştir. Bu, OOP'deki **Encapsulation** ilkesinin mimari karşılığıdır. Bir servis (sınıf), verisini (field) dış dünyadan saklar ve sadece API (metot) üzerinden erişim verir.
+
+### 5.2. Interface Segregation (Arayüz Ayrımı)
+Servisler birbirlerinin iç yapısını veya veritabanı şemasını bilmezler. Sadece tanımlı **Interface (API Contract)** üzerinden haberleşirler. Bu, istemcilerin servisin implementasyon detaylarına bağımlı olmamasını sağlar (Dependency Inversion).
+
+### 5.3. Single Responsibility Principle (SRP)
+Her mikroservisin tek bir iş alanına (Bounded Context) odaklanması, bir sınıfta olması gereken **Tek Sorumluluk Prensibi (SRP)** ile birebir örtüşmektedir.
 
 ---
 
 ## 📝 Sonraki Adımlar (To-Do List)
-- [ ] Vaka çalışmalarındaki "Decomposition View" ve "Deployment View" diyagramları incelenecek.
-- [ ] Makalede geçen **SAGA** ve **Circuit Breaker** desenlerinin kod tarafındaki karşılıkları araştırılacak.
-- [ ] "Loose Coupling" kavramının önerilen mimaride nasıl sağlandığı detaylandırılacak.
+- [ ] Vaka çalışmalarının (Transportation System) sonuçları ve başarı metrikleri incelenecek.
+- [ ] Makalenin "Deployment View" (Şekil 5) diyagramındaki konteyner yapıları analiz edilecek.
+- [ ] Kendi yorumlarım ve eleştirilerim eklenecek.
