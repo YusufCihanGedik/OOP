@@ -3,7 +3,7 @@
 **Öğrenci:** Yusuf Cihan GEDİK  
 **Öğrenci No:** Y245060014  
 **Ders:** Nesneye Dayalı Programlama  
-**Durum:** Taslak Aşamasında (WIP) - %50 Tamamlandı
+**Durum:** Taslak Aşamasında (WIP) 
 
 ---
 
@@ -24,8 +24,6 @@ Yazılım endüstrisinde sistemler karmaşıklaştıkça, geleneksel **Monolitik
 * **Ölçeklenebilirlik (Scalability) Kısıtları:** Sistemin sadece belirli bir modülü yoğun yük altında kalsa bile, tüm sunucunun (gereksiz kaynak kullanımıyla) ölçeklendirilmek zorunda kalınması.
 * **Teknoloji Bağımlılığı:** Tüm sistemin tek bir dil veya framework'e mahkum olması, yeni teknolojilerin denenmesini engellemesi.
 
-Mikroservis Mimarisi (MSA) bu sorunlara **"Gevşek Bağlılık" (Loose Coupling)** ve **"Yüksek Bütünlük" (High Cohesion)** ile çözüm getirse de, endüstride standart bir uygulama rehberinin eksikliği geliştiricileri; servis sınırlarının belirlenmesi, veri tutarlılığı ve dağıtık hata ayıklama konularında zorlamaktadır.
-
 ---
 
 ## 3. Metodoloji: Hibrit ve Alan Odaklı Yaklaşım
@@ -39,49 +37,60 @@ Sadece teorik bilgiyle yetinilmemiş, **AWS, Google Cloud ve Microsoft Azure** g
 MSA'nın bileşenleri bir "Özellik Ağacı" (Feature Diagram) üzerinde modellenmiştir. Özellikler şu şekilde sınıflandırılmıştır:
 * **Zorunlu (Mandatory):** Service Discovery, API Gateway.
 * **Opsiyonel (Optional):** Circuit Breaker, Distributed Tracing.
-* **Alternatifli (XOR):** İletişim yöntemi olarak "Senkron" (REST) veya "Asenkron" (Messaging) seçimi.
 
 ---
 
 ## 4. Önerilen Referans Mimarinin Detaylı Analizi
-*(Bu bölüm, makaledeki "Decomposition View" ve "Layered View" incelenerek oluşturulmuştur.)*
-
-Önerilen mimari, sistemi yatay katmanlara ve dikey modüllere ayırarak yönetilebilirliği artırmayı hedefler. Kritik bileşenler şunlardır:
+Önerilen mimari, sistemi yatay katmanlara ve dikey modüllere ayırarak yönetilebilirliği artırmayı hedefler.
 
 ### 4.1. İletişim ve Giriş Katmanı (Communication)
-* **API Gateway:** İstemciler ile servisler arasındaki tek giriş noktasıdır. Yönlendirme, kimlik doğrulama ve protokol dönüşümü (HTTPS -> HTTP) yapar.
+* **API Gateway:** İstemciler ile servisler arasındaki tek giriş noktasıdır. Yönlendirme, kimlik doğrulama ve protokol dönüşümü yapar.
 * **Senkron vs Asenkron:** Servisler arası iletişimde REST/gRPC (Senkron) veya Message Broker (Asenkron) yapıları tanımlanmıştır.
 
 ### 4.2. Veri Yönetimi ve Tutarlılık (Data Management)
-Monolitik yapıdaki "Ortak Veritabanı" yerine, **Database-per-Service** (Her servise özel veritabanı) deseni benimsenmiştir. Dağıtık veri tutarlılığı için ise şu desenler önerilmiştir:
-* **SAGA Pattern:** Uzun süreli işlemleri yönetmek için telafi edici (compensating) transaction'lar kullanılır.
-* **CQRS (Command Query Responsibility Segregation):** Okuma ve yazma işlemlerinin farklı modeller üzerinden yapılması.
+Monolitik yapıdaki "Ortak Veritabanı" yerine, **Database-per-Service** (Her servise özel veritabanı) deseni benimsenmiştir. Veri tutarlılığı için **SAGA Pattern** (telafi edici işlemler) önerilmiştir.
 
-### 4.3. Dayanıklılık ve Hata Toleransı (Resilience)
-Dağıtık sistemlerde ağ hataları kaçınılmaz olduğu için şu koruma mekanizmaları mimariye eklenmiştir:
+### 4.3. Dayanıklılık ve Gözlemlenebilirlik
 * **Circuit Breaker:** Hatalı bir servise giden trafiği keserek sistemin geri kalanını korur.
-* **Bulkhead Pattern:** Sistem kaynaklarını izole ederek bir arızanın yayılmasını engeller.
-
-### 4.4. Gözlemlenebilirlik (Observability)
-Sistemin sağlığını izlemek için **Distributed Tracing** (Dağıtık İzleme), **Log Aggregation** (Log Toplama) ve **Health Check** modülleri zorunlu kılınmıştır.
+* **Observability:** Sistemin sağlığını izlemek için **Distributed Tracing** ve **Log Aggregation** modülleri zorunlu kılınmıştır.
 
 ---
 
-## 5. Nesneye Dayalı Programlama (OOP) ile İlişkiler
-Makaledeki mimari kararlar, OOP prensiplerinin sistem tasarımına yansımasıdır:
+## 5. Dağıtım Mimarisi (Deployment View)
+Makalede sunulan "Deployment View" (Şekil 5), bileşenlerin fiziksel kaynaklara nasıl dağıtılacağını modellemektedir. Bu görünüm, "Allocation Style" ve "Component & Connector Style" yaklaşımlarını birleştirir.
 
-### 5.1. Modülerlik ve Encapsulation (Kapsülleme)
-Makalede servislerin "Business Capability" (İş Yeteneği) bazında ayrıştırılması gerektiği belirtilmiştir. Bu, OOP'deki **Encapsulation** ilkesinin mimari karşılığıdır. Bir servis (sınıf), verisini (field) dış dünyadan saklar ve sadece API (metot) üzerinden erişim verir.
+* **Bağımsız Dağıtılabilirlik (Independent Deployability):** Dağıtık mimarideki her servis (Authentication, Logging, Business Services) birbirinden bağımsız "Deployable Unit" olarak modellenmiştir.
+* **Konteynerizasyon:** Servislerin Docker gibi konteyner teknolojileriyle paketlenmesi ve bulut ortamlarına (AWS/Azure/Google Cloud) taşınabilir olması esas alınmıştır.
+* **Orkestrasyon:** Konteynerlerin yönetimi, ölçeklenmesi ve sağlığı için Kubernetes benzeri **"Service Orchestrator"** ve uygulama sunucularında çalışan **"Agents"** bileşenleri mimaride yer alır.
 
-### 5.2. Interface Segregation (Arayüz Ayrımı)
-Servisler birbirlerinin iç yapısını veya veritabanı şemasını bilmezler. Sadece tanımlı **Interface (API Contract)** üzerinden haberleşirler. Bu, istemcilerin servisin implementasyon detaylarına bağımlı olmamasını sağlar (Dependency Inversion).
+---
 
-### 5.3. Single Responsibility Principle (SRP)
-Her mikroservisin tek bir iş alanına (Bounded Context) odaklanması, bir sınıfta olması gereken **Tek Sorumluluk Prensibi (SRP)** ile birebir örtüşmektedir.
+## 6. Vaka Çalışmaları ve Doğrulama (Case Studies)
+Önerilen mimarinin geçerliliği, iki farklı endüstriyel proje üzerinde test edilmiş ve radar grafikleriyle analiz edilmiştir.
+
+### Vaka 1: Ulaşım Yönetim Sistemi (Transportation Management)
+COVID-19 sonrası artan lojistik taleplerini karşılamak için geliştirilmiştir.
+* **Ekip:** 11 kişilik ekip (2 SRE, 1 Mimar, 6 Geliştirici vb.).
+* **Platform:** Amazon Web Services (AWS) üzerinde koşturulmuştur.
+* **Kritik Mimari Karar:** Bu projede maliyet (AWS costs) nedeniyle **API Gateway özel bir bileşen olarak kullanılmamış**, bunun yerine **Load Balancer** doğrudan giriş noktası olarak kullanılmıştır. Kimlik doğrulama işlemi her mikroservisin kendi sorumluluğuna bırakılmıştır.
+
+### Vaka 2: Uzaktan Ekip Yönetimi (Remote Team Management)
+Pandemi sürecinde uzaktan çalışan ekiplerin performans takibi için geliştirilmiştir.
+* **Ekip:** 9 kişilik ekip.
+* **Platform:** Google Cloud Platform (GCP) tercih edilmiştir.
+* **Mimari Farklılık:** Birinci vakanın aksine, bu projede **API Gateway** aktif olarak kullanılmış ve yük dengeleme (load balancing) özelliği buradan sağlanmıştır. Ayrıca performans gereksinimleri nedeniyle sisteme **Caching (Önbellekleme)** modülü dahil edilmiştir.
+
+---
+
+## 7. Nesneye Dayalı Programlama (OOP) ile İlişkiler
+* **Modülerlik ve Encapsulation:** Servislerin "Business Capability" bazında ayrıştırılması, OOP'deki Encapsulation ilkesinin mimari karşılığıdır.
+* **Interface Segregation:** Servisler birbirlerinin veritabanına erişmez, sadece tanımlı Interface (API) üzerinden haberleşir.
+* **Single Responsibility Principle (SRP):** Her mikroservis tek bir iş alanına odaklanır ve o alanın gerektirdiği teknolojiyi kullanmakta özgürdür (Polyglot Programming).
 
 ---
 
 ## 📝 Sonraki Adımlar (To-Do List)
-- [ ] Vaka çalışmalarının (Transportation System) sonuçları ve başarı metrikleri incelenecek.
-- [ ] Makalenin "Deployment View" (Şekil 5) diyagramındaki konteyner yapıları analiz edilecek.
-- [ ] Kendi yorumlarım ve eleştirilerim eklenecek.
+- [ ] Makalenin "Discussion" bölümündeki anket sonuçları incelenecek.
+- [ ] Sonuç (Conclusion) bölümü özetlenecek.
+- [ ] Kaynakça formatı düzenlenecek.
+- [ ] Kişisel yorumlar eklenecek.
