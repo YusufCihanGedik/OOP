@@ -121,4 +121,5 @@ Bu çalışma, monolitik yapıdan mikroservislere geçişte yaşanan belirsizli�
 ---
 
 ## 📝 Sonraki Adımlar
-- [ ] Rpor Kontrolu ve detayların eklenmesi
+- [ ] Raporun son okuması ve yazım hataları kontrolü.
+- [ ] GitHub'a PDF formatında nihai raporun yüklenmesi. 
