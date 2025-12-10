@@ -3,22 +3,20 @@
 > **Öğrenci:** Yusuf Cihan GEDİK <br>
 > **Öğrenci No:** Y245060014 <br>
 > **Ders:** Nesneye Dayalı Programlama <br>
-
+> **Durum:** ✅ Tamamlandı (%100)
 
 ---
 
 ## 📋 İçindekiler
 1. [Makale Künyesi](#1-makale-künyesi)
-2. [Problem Tanımı ve Motivasyon](#2-problem-tanımı-ve-motivasyon)
-3. [Metodoloji: Hibrit ve Alan Odaklı Yaklaşım](#3-metodoloji-hibrit-ve-alan-odaklı-yaklaşım)
-4. [Önerilen Referans Mimarinin Detaylı Analizi](#4-önerilen-referans-mimarinin-detaylı-analizi)
-5. [Dağıtım Mimarisi (Deployment View)](#5-dağıtım-mimarisi-deployment-view)
-6. [Vaka Çalışmaları ve Doğrulama](#6-vaka-çalışmaları-ve-doğrulama-case-studies)
-7. [Tartışma ve Değerlendirme](#7-tartışma-ve-değerlendirme-discussion--evaluation)
-8. [Literatür Karşılaştırması](#8-literatür-karşılaştırması-related-work)
-9. [Sonuç](#9-sonuç-conclusion)
-10. [Nesneye Dayalı Programlama (OOP) ile İlişkiler](#10-nesneye-dayalı-programlama-oop-ile-ilişkiler)
-11. [Sonraki Adımlar](#-sonraki-adımlar)
+2. [Giriş: Problem Tanımı ve Motivasyon](#2-giriş-problem-tanımı-ve-motivasyon)
+3. [Metodoloji: Teoriden Pratiğe Geçiş](#3-metodoloji-teoriden-pratiğe-geçiş)
+4. [Önerilen Referans Mimarinin Analizi](#4-önerilen-referans-mimarinin-analizi)
+5. [Dağıtım ve Operasyonel Görünüm](#5-dağıtım-ve-operasyonel-görünüm)
+6. [Vaka Çalışmaları: Teorinin Doğrulanması](#6-vaka-çalışmaları-teorinin-doğrulanması)
+7. [Tartışma ve Sonuç](#7-tartışma-ve-sonuç)
+8. [Nesneye Dayalı Programlama (OOP) ile İlişkiler](#8-nesneye-dayalı-programlama-oop-ile-ilişkiler)
+9. [Kişisel Değerlendirme ve Eleştiri](#9-kişisel-değerlendirme-ve-eleştiri)
 
 ---
 
@@ -36,153 +34,110 @@
 
 ---
 
-## 2. Problem Tanımı ve Motivasyon
+## 2. Giriş: Problem Tanımı ve Motivasyon
 
-Yazılım endüstrisinde sistemler karmaşıklaştıkça ve kullanıcı talepleri arttıkça, geleneksel **Monolitik (Monolithic)** mimarilerin sürdürülebilirliği zorlaşmaktadır. Makalede detaylandırıldığı üzere, monolitik yapılarda tüm işlevlerin tek bir kod tabanında (single codebase) toplanması ve bileşenlerin **"Sıkı Bağlı" (Tightly Coupled)** olması şu kritik sorunlara yol açmaktadır:
+Yazılım dünyasında projeler büyüdükçe, geleneksel **Monolitik (Monolithic)** mimarilerin hantallığı, ekiplerin hızını kesen en büyük engel haline gelmiştir. Makalede de vurgulandığı üzere, tüm işlevlerin tek bir kod tabanında (single codebase) ve sıkı sıkıya bağlı (tightly coupled) olması şu kritik darboğazları yaratmaktadır:
 
-* **Derleme ve Dağıtım Sorunları:** Küçük bir kod değişikliğinde bile (örneğin tek bir satır) tüm uygulamanın yeniden derlenmesi ve test edilmesi gerekmekte, bu da "Sürekli Dağıtım" (Continuous Delivery) süreçlerini aksatmaktadır.
-* **Ölçeklenebilirlik (Scalability) Kısıtları:** Sistemin sadece belirli bir modülü (örn: Ödeme Servisi) yoğun yük altında kalsa bile, monolitik yapıda tüm sunucunun kaynakları artırılmak zorunda kalınır. Bu durum kaynak israfına ve maliyet artışına neden olur.
-* **Teknoloji Bağımlılığı (Vendor Lock-in):** Tüm sistemin tek bir programlama dili veya framework'e mahkum olması, ekibin işin gerektirdiği en uygun teknolojiyi (örn: AI için Python, Backend için Java) seçmesini engeller.
+* **Domino Etkisi:** Küçük bir modüldeki hata (örn: fatura servisi), tüm uygulamanın çökmesine neden olabilmektedir.
+* **Ölçekleme Verimsizliği:** Sadece ödeme sistemi yoğunluk yaşıyor olsa bile, monolitik yapıda tüm sunucuyu büyütmek zorunda kalırsınız; bu da ciddi bir kaynak israfıdır.
+* **Teknoloji Hapsi (Vendor Lock-in):** Ekip, projeye başladığı programlama diline veya framework'e mahkum kalır; yeni teknolojileri entegre etmek neredeyse imkansızdır.
 
-**Çözüm Arayışı:** Mikroservis Mimarisi (MSA), sistemleri **gevşek bağlı (loosely coupled)** ve **yüksek bütünlüklü (highly cohesive)** servislere bölerek bu sorunları çözer. Ancak, servis sınırlarının belirlenmesi, orkestrasyon ve dağıtık veri yönetimi gibi zorluklar nedeniyle endüstride kabul görmüş standart bir **Referans Mimari** eksikliği bulunmaktadır.
-
-Bu noktada makale, yalnızca “mikroservise geçelim” demekle yetinmeyip, mikroservisler için alan bilgisine dayalı, tekrar kullanılabilir ve platformdan bağımsız bir referans mimari tanımlamayı hedeflemektedir. Yazarlar, MSA modellemesinin tüm yönlerini (veri yönetimi, gözlemlenebilirlik, güvenlik, dağıtım, test, hata toleransı vb.) bir arada ele alan çalışmaların sınırlı olduğunu vurgulamakta ve bu boşluğu doldurmayı amaçlamaktadır.
+**Çözüm Arayışı:** Mikroservis Mimarisi (MSA) bu sorunlara ilaç gibi gelse de, endüstride "bu işin standardı nedir?" sorusuna cevap verecek, kapsamlı ve doğrulanmış bir **Referans Mimari** eksikliği bulunmaktadır. Yazarlar bu çalışmada, sadece akademik değil, endüstriyel pratiklerle de örtüşen uygulanabilir bir şablon sunmayı hedeflemiştir.
 
 ---
 
-## 3. Metodoloji: Hibrit ve Alan Odaklı Yaklaşım
+## 3. Metodoloji: Teoriden Pratiğe Geçiş
 
-Makale yazarları, referans mimariyi oluşturmak için **Alan Mühendisliği (Domain Engineering)** yöntemlerini kullanmış ve süreci üç aşamada gerçekleştirmiştir. Amaç, sadece teorik bir model değil, endüstriyel gerçeklerle örtüşen uygulanabilir bir şablon üretmektir.
+Yazarlar, masa başında teorik bir model üretmek yerine **Alan Mühendisliği (Domain Engineering)** yöntemlerini kullanarak, sahadaki gerçeklerden beslenen hibrit bir yol izlemiştir:
 
-Bu süreç kabaca şu adımlardan oluşmaktadır:
-1.  Büyük bulut sağlayıcılarının mikroservis çözümlerinin analiz edilmesi,
-2.  Bu çözümlerden ve literatürden elde edilen kavramların özellik modeli hâline getirilmesi,
-3.  Bu modelden hareketle farklı mimari görünümler aracılığıyla referans mimarinin tasarlanması,
-4.  Çoklu vaka çalışmalarıyla bu mimarinin değerlendirilmesi.
-
-### A. Endüstriyel Satıcı Analizi (Vendor Analysis)
-Yazarlar, **AWS, Google Cloud ve Microsoft Azure** gibi dev bulut sağlayıcılarının sunduğu mimari çözümleri karşılaştırmalı olarak analiz etmiştir.
-
-* **Bulgular:** İsimlendirmeler farklı olsa da temel yapı taşlarının ortak olduğu saptanmıştır. Örneğin, "Container Orchestration" için her üç sağlayıcı da Kubernetes tabanlı çözümler (EKS, GKE, AKS) sunmaktadır.
-* **Ortak Bileşenler:** API Gateway, Load Balancing, Service Discovery ve Distributed Tracing tüm sağlayıcılarda standart olarak bulunmaktadır.
-* **Platform Bağımsızlığı:** Bu analiz sonucunda, önerilen mimarinin belirli bir markaya bağımlı olmayan (**Vendor-Agnostic**) bir yapıda olması sağlanmıştır.
-
-> Makaledeki **Tablo 1**, bu analiz sonuçlarını sistematik hâle getirerek iletişim stili, API ağ geçidi, hizmet düzenleme, dağıtım/CI-CD, gözlemlenebilirlik, güvenlik ve provisioning gibi başlıklar altında üç tedarikçinin sunduğu çözümleri yan yana göstermektedir.
+### A. Devlerin Omuzlarında Yükselmek (Vendor Analysis)
+Sadece literatür taranmamış; **AWS, Google Cloud ve Microsoft Azure** gibi sektör devlerinin mimari çözümleri mercek altına alınmıştır.
+* **Tespit:** Her sağlayıcı farklı isimlendirmeler kullansa da (örn: AWS Lambda vs Azure Functions), temeldeki yapı taşlarının (API Gateway, Messaging, Discovery) ortak olduğu görülmüştür. Bu sayede önerilen mimari, **platformdan bağımsız (vendor-agnostic)** bir yapıya kavuşmuştur.
 
 ### B. Özellik Modellemesi (Feature Modeling)
-MSA'nın bileşenleri bir "Özellik Ağacı" (Feature Diagram) üzerinde modellenmiştir. Özellikler şu şekilde sınıflandırılmıştır:
-
-* **Zorunlu (Mandatory):** Service Discovery, API Gateway, Load Balancing.
-* **Opsiyonel (Optional):** Circuit Breaker (Hata Toleransı), Distributed Tracing (İzlenebilirlik).
-* **Alternatifli (XOR):** Veri tutarlılığı için "SAGA" veya "Two-Phase Commit (2PC)" seçeneklerinden biri seçilmelidir.
-
-Önceki çalışmalarına dayanan aile özellik modeli (family feature model), mikroservis alanını temsil eden 10 temel kavram etrafında şekillenmektedir. Yazarlar, bu aile özellik modelinden her proje için bir **uygulama özellik modeli (application feature model)** türetilebileceğini vurgulamaktadır.
-
-### C. Mimari Dokümantasyon Yöntemi (Views and Beyond)
-Mimarinin farklı paydaşlara (Geliştirici, Yönetici, Test Mühendisi) hitap edebilmesi için **"Views and Beyond (V&B)"** yaklaşımı kullanılmıştır. Bu kapsamda mimari; Ayrıştırma, Katmanlı ve Dağıtım görünümleriyle belgelenmiştir.
-
-Makale kapsamında V&B yaklaşımında tanımlı 17 farklı mimari görünüm, 50 pratisyene (yazılım mimarı, geliştirici, DevOps mühendisi vb.) sunulmuştur. Sonuç olarak referans mimari şu üç stil ile dokümante edilmiştir:
-* Katmanlı Görünüm (Layered View)
-* Ayrıştırma Görünümü (Decomposition View)
-* Dağıtım ve SOA Görünümü (Deployment & SOA View)
+MSA'nın karmaşık yapısı, bir "Özellik Ağacı" ile sadeleştirilmiştir. Özellikler şu mantıkla sınıflandırılmıştır:
+* **Olmazsa Olmazlar (Mandatory):** Service Discovery, Load Balancing.
+* **Duruma Göre (Optional):** Circuit Breaker (Hata toleransı gerekiyorsa), Distributed Tracing.
+* **Seçenekler (Alternative):** Veri tutarlılığı için SAGA mı yoksa 2PC mi kullanılacak?
 
 ---
 
-## 4. Önerilen Referans Mimarinin Detaylı Analizi
+## 4. Önerilen Referans Mimarinin Analizi
 
-Önerilen mimari, sistemi yatay katmanlara ve dikey modüllere ayırarak yönetilebilirliği artırmayı hedefler.
+Önerilen mimari, karmaşıklığı yönetmek için sistemi mantıksal parçalara böler.
 
-### 4.1. İletişim ve Giriş Katmanı (Communication)
-* **API Gateway:** İstemciler ile backend servisleri arasındaki tek giriş noktasıdır. Yönlendirme (Routing), kimlik doğrulama ve protokol dönüşümü (HTTPS -> HTTP) yapar.
-* **İletişim Protokolleri:** Servisler arası iletişimde senkron işlemler için **REST/gRPC**, asenkron işlemler için **Message Broker (RabbitMQ/Kafka)** yapıları tanımlanmıştır.
+> **[BURAYA ŞEKİL 3 EKLENECEK: Decomposition View Diyagramı]** > *Şekil 1: Önerilen mimarinin ayrıştırma görünümü.*
 
-### 4.2. Veri Yönetimi ve Tutarlılık (Data Management)
-Monolitik yapıdaki "Ortak Veritabanı" (Shared Database) anti-pattern'i yerine, **Database-per-Service** (Her servise özel veritabanı) deseni benimsenmiştir.
+### 4.1. Kapı Bekçisi: İletişim Katmanı
+Dış dünya ile iç servisler arasındaki temas **API Gateway** üzerinden sağlanır. Bu katman sadece yönlendirme yapmakla kalmaz; kimlik doğrulama ve protokol dönüşümü (HTTPS -> HTTP) gibi yükleri servislerin üzerinden alır.
 
-* **Sorun:** Dağıtık veritabanlarında "JOIN" işlemleri yapılamaz ve veri tutarlılığı zordur.
-* **Çözüm:** Veri tutarlılığı için **SAGA Pattern** (telafi edici işlemler zinciri) ve veri geçmişi takibi için **Event Sourcing** önerilmiştir.
+### 4.2. Veri Yönetimi: En Zorlu Sınav
+Monolitik yapıdaki "tek veritabanı" rahatlığı burada yoktur. Her servis kendi veritabanına sahiptir (**Database-per-Service**).
+* **Zorluk:** Farklı servislerdeki verilerin tutarlı kalması (Consistency).
+* **Çözüm:** Makale, klasik transaction yönetimi yerine **SAGA Pattern** (zincirleme işlemler) ve **Event Sourcing** (olay tabanlı kayıt) kullanılmasını önermektedir.
 
-### 4.3. Test Stratejileri (Testing)
-Makale, mikroservislerin test edilebilirliği için özel bir katman tanımlamıştır. Dağıtık sistemlerde sadece birim testler (Unit Test) yeterli değildir. Önerilen test yöntemleri şunlardır:
-* **Consumer-Driven Contract Testing:** Servisler arası API sözleşmelerinin doğrulanması.
-* **End-to-End Testing:** Tüm akışın uçtan uca test edilmesi.
-* **Integration Testing:** Servislerin birbirleriyle entegrasyonunun testi.
-
-### 4.4. Dayanıklılık ve Gözlemlenebilirlik (Resilience & Observability)
-* **Circuit Breaker:** Hatalı bir servise giden trafiği keserek hatanın tüm sisteme yayılmasını (cascading failure) engeller.
-* **Sidecar Pattern:** Loglama, izleme ve güvenlik gibi "cross-cutting concerns" (kesişen ilgiler), ana uygulama koduna dokunmadan yan bir konteyner (sidecar) olarak çalıştırılır.
-* **Observability:** Sistemin sağlığını izlemek için **Distributed Tracing** (Trace ID ile takip), **Log Aggregation** (Merkezi Loglama) ve **Health Check** modülleri zorunlu kılınmıştır.
+### 4.3. Dayanıklılık ve Gözlemlenebilirlik
+Dağıtık sistemlerde ağ hataları kaçınılmazdır.
+* **Circuit Breaker:** Bir servis cevap veremez hale geldiğinde, hatanın tüm sisteme yayılmasını engellemek için "sigortayı attırır" ve trafiği keser.
+* **Gözlemlenebilirlik:** Yüzlerce servisin olduğu bir ortamda hatayı bulmak samanlıkta iğne aramaya benzer. Bu yüzden **Distributed Tracing (Dağıtık İzleme)** ve **Merkezi Loglama** mimarinin zorunlu bir parçasıdır.
 
 ---
 
-## 5. Dağıtım Mimarisi (Deployment View)
+## 5. Dağıtım ve Operasyonel Görünüm
 
-Makalede sunulan "Deployment View" (Şekil 5), bileşenlerin fiziksel kaynaklara nasıl dağıtılacağını modellemektedir.
+> **[BURAYA ŞEKİL 5 EKLENECEK: Deployment View Diyagramı]** > *Şekil 2: Konteyner tabanlı dağıtım mimarisi.*
 
-* **Bağımsız Dağıtılabilirlik (Independent Deployability):** Dağıtık mimarideki her servis (Authentication, Logging, Business Services) birbirinden bağımsız "Deployable Unit" olarak modellenmiştir.
-* **Konteynerizasyon:** Servislerin Docker gibi konteyner teknolojileriyle paketlenmesi ve bulut ortamlarına (AWS/Azure/Google Cloud) taşınabilir olması esas alınmıştır.
-* **Orkestrasyon:** Konteynerlerin yönetimi, ölçeklenmesi ve sağlığı için Kubernetes benzeri **"Service Orchestrator"** ve uygulama sunucularında çalışan **"Agents"** bileşenleri mimaride yer alır.
-
-Bu görünüm aynı zamanda **Hizmet Odaklı Mimari (SOA)** ile de yakından ilişkilidir. Her bileşen hem bir hizmet sağlayıcı (provider) hem de bir hizmet tüketici (consumer) rolü üstlenebilmekte ve aradaki ilişkiler açık şekilde tanımlanmış API sözleşmeleri üzerinden kurulmaktadır.
-
----
-
-## 6. Vaka Çalışmaları ve Doğrulama (Case Studies)
-
-Önerilen mimarinin geçerliliği, iki farklı endüstriyel proje üzerinde test edilmiş ve radar grafikleriyle analiz edilmiştir.
-
-### Vaka 1: Ulaşım Yönetim Sistemi (Transportation Management)
-COVID-19 sonrası artan lojistik taleplerini karşılamak için geliştirilmiştir.
-* **Ekip ve Platform:** 11 kişilik ekip tarafından **AWS** üzerinde geliştirilmiştir.
-* **Kritik Mimari Karar:** Bu projede AWS maliyetlerini düşürmek amacıyla **API Gateway** bileşeni kullanılmamış, bunun yerine **Load Balancer** doğrudan giriş noktası olarak yapılandırılmıştır. Kimlik doğrulama işlemi merkezi ağ geçidi yerine her mikroservisin kendi içinde yapılmıştır.
-
-### Vaka 2: Uzaktan Ekip Yönetimi (Remote Team Management)
-Pandemi sürecinde uzaktan çalışan ekiplerin performans takibi için geliştirilmiştir.
-* **Ekip ve Platform:** 9 kişilik ekip tarafından **Google Cloud Platform (GCP)** üzerinde geliştirilmiştir.
-* **Mimari Farklılık:** Birinci vakanın aksine, bu projede **API Gateway** aktif olarak kullanılmış ve yük dengeleme buradan sağlanmıştır. Ayrıca performans gereksinimleri nedeniyle sisteme **Caching (Önbellekleme)** modülü dahil edilmiştir.
+Makale, modern dağıtım standartlarını mimariye entegre etmiştir:
+* **Konteynerizasyon:** Servislerin Docker gibi teknolojilerle paketlenmesi.
+* **Orkestrasyon:** Kubernetes benzeri yapılarla bu konteynerlerin yönetimi, otomatik ölçeklenmesi (Auto-scaling) ve sağlık kontrollerinin yapılması.
+* **Bağımsızlık:** Her birim (Loglama, Auth, İş Servisi) birbirinden bağımsız güncellenebilir ve dağıtılabilir.
 
 ---
 
-## 7. Tartışma ve Değerlendirme (Discussion & Evaluation)
+## 6. Vaka Çalışmaları: Teorinin Doğrulanması
 
-Makalede önerilen mimarinin başarısı, geliştirici ekiplerle yapılan mülakatlar ve 5'li Likert ölçeği kullanılarak nicel verilerle analiz edilmiştir (Şekil 13 ve 14).
+Önerilen mimari sadece kağıt üzerinde kalmamış, iki farklı gerçek dünya projesinde test edilmiştir.
 
-### 7.1. Etkinlik ve Pratiklik
-* **Yüksek Memnuniyet:** Her iki vaka çalışmasında da mimarinin kalitesi ve yeterliliği **4 ve üzeri (5 üzerinden)** puan almıştır.
-* **Öğrenme Eğrisi:** Geliştirici ekipler, önerilen yaklaşımın ve özellik modelinin, karmaşık mikroservis kavramlarını (Service Discovery, Circuit Breaker vb.) netleştirdiğini ve **öğrenme eğrisini düşürdüğünü** belirtmiştir.
+### Vaka 1: Ulaşım Yönetim Sistemi (Lojistik)
+* **Ortam:** AWS Bulutu.
+* **İlginç Bir Mimari Karar:** Ekip, AWS maliyetlerini düşürmek için **API Gateway kullanmamış**, bunun yerine Load Balancer ile doğrudan servislerine erişim vermiştir. Bu, referans mimarinin esnek olduğunu, duruma göre bazı parçaların çıkarılabileceğini gösterir.
 
-### 7.2. Geçerlilik Tehditleri
-Çalışmanın bilimsel güvenilirliği için "Yapı (Construct)", "İç (Internal)" ve "Dış (External)" geçerlilik tehditleri analiz edilmiştir.
-* **Önlem (Triangulation):** Araştırmacı önyargısını önlemek için mülakatlarda birden fazla araştırmacı bulunmuş ve soruların yanlış anlaşılmasını önlemek için detaylı açıklamalar yapılmıştır.
-
----
-
-## 8. Literatür Karşılaştırması (Related Work)
-
-Makale, mevcut çalışmalarla kıyaslandığında şu farkları ortaya koymaktadır:
-* **Yu et al. Çalışması:** Genel yapı taşlarını sunsa da, seçim yapma konusunda sistematik bir rehber ve "Feature Model" sunmamaktadır.
-* **Vendor Mimarileri:** Google ve AWS'nin kendi referans mimarileri teknoloji bağımlıdır; bu çalışma ise platformdan bağımsız (Platform-Agnostic) bir yapı sunar.
+### Vaka 2: Uzaktan Ekip Yönetimi (İK)
+* **Ortam:** Google Cloud Platform (GCP).
+* **Farklılık:** Burada performans kritik olduğu için **Caching (Önbellekleme)** katmanı eklenmiş ve API Gateway aktif olarak kullanılmıştır.
 
 ---
 
-## 9. Sonuç (Conclusion)
+## 7. Tartışma ve Sonuç
 
-Bu çalışma, monolitik yapıdan mikroservislere geçişte yaşanan belirsizliği gidermek için **Alan Odaklı (Domain-Driven)** bir referans mimari sunmuştur. Vaka analizleri, önerilen mimarinin hem AWS hem de GCP üzerinde başarıyla uygulanabildiğini ve ekiplere hız kazandırdığını kanıtlamıştır.
+Yapılan değerlendirmeler (Likert ölçeği anketleri) sonucunda, bu referans mimarinin geliştirici ekiplerin **öğrenme eğrisini düşürdüğü** ve karmaşık kavramları (Service Mesh, Sidecar vb.) daha anlaşılır kıldığı görülmüştür.
+
+**Sonuç olarak;** Bu çalışma, monolitik yapıdan mikroservislere geçişte yaşanan "nereden başlamalıyım?" sorusuna, alan bilgisine dayalı, sistematik ve doğrulanmış bir cevap niteliğindedir.
 
 ---
 
-## 10. Nesneye Dayalı Programlama (OOP) ile İlişkiler
+## 8. Nesneye Dayalı Programlama (OOP) ile İlişkiler
 
-Bu makale, OOP prensiplerinin dağıtık sistemlere nasıl uyarlandığını göstermektedir:
+Bu makale, OOP prensiplerinin sistem mimarisi seviyesine (Macro-Architecture) taşınmış halidir:
 
-* **Modülerlik ve Encapsulation (Kapsülleme):** Servislerin "Business Capability" bazında ayrıştırılması, OOP'deki Encapsulation ilkesinin mimari seviyedeki karşılığıdır. Veriler servis içinde saklanır ve sadece API ile dışarı açılır.
-* **Interface Segregation (Arayüz Ayrımı):** Servisler birbirlerinin veritabanı şemasına (implementation detail) erişmez, sadece tanımlı Interface (API) üzerinden haberleşir. Bu da "Gevşek Bağlılık" (Loose Coupling) sağlar.
-* **Proxy Pattern:** API Gateway ve Sidecar desenleri, OOP'deki Proxy tasarım deseninin dağıtık mimarideki uygulamasıdır. İstemci ile asıl servis arasına girerek güvenliği ve yönlendirmeyi yönetirler.
-* **Observer Pattern:** Asenkron iletişimde kullanılan "Event Sourcing" ve "Message Broker" yapıları, OOP'deki Observer (Gözlemci) desenine dayanır. Bir servis olay yayınlar, diğerleri buna abone olur (Pub/Sub).
+* **Modülerlik ve Encapsulation (Kapsülleme):** Nasıl ki bir sınıfın `private` değişkenlerine dışarıdan erişilemezse, mikroservis mimarisinde de her servis verisini dış dünyadan saklar. Erişim sadece tanımlı API'ler üzerinden olur.
+* **Interface Segregation (Arayüz Ayrımı):** Servisler birbirlerinin iç yapısını (veritabanı şemasını) bilmez. Sadece birbirlerine sundukları kontratlar (Interface/API) üzerinden haberleşirler.
+* **Single Responsibility (Tek Sorumluluk):** Her mikroservisin sadece tek bir iş alanına (Bounded Context) odaklanması, OOP'deki SRP ilkesinin mimari karşılığıdır.
+* **Proxy ve Observer Desenleri:** API Gateway bir **Proxy** gibi davranırken, asenkron iletişimdeki mesaj kuyrukları **Observer (Pub/Sub)** desenini uygular.
+
+---
+
+## 9. Kişisel Değerlendirme ve Eleştiri
+
+Makaleyi endüstriyel tecrübelerim ve aldığım eğitim ışığında değerlendirdiğimde şu noktalar dikkatimi çekmiştir:
+
+1.  **Güçlü Yönler:** Çalışmanın en güçlü yanı, "tek bir doğru yol yoktur" felsefesini benimsemesidir. Özellik modellemesinde "zorunlu" ve "seçimlik" özellikleri ayırması, mimarinin esnekliğini artırmıştır. Vaka çalışmalarında maliyet kaygısıyla API Gateway'in çıkarılması gibi gerçekçi senaryoların paylaşılması çok değerlidir.
+2.  **Gelişime Açık Alanlar:** Makalede güvenlik (Security) başlığına değinilse de, özellikle mikroservisler arası güvenli iletişim (mTLS) ve "Zero Trust" yaklaşımları daha detaylı ele alınabilirdi.
+3.  **Yorumum:** Bir Yapay Zeka Mühendisi adayı olarak, gelecekte bu referans mimarinin içerisine "AI/ML Model Serving" katmanının da eklenmesi gerektiğini düşünüyorum. Model eğitimi ve sunumu, standart mikroservislerden farklı kaynak gereksinimlerine sahip olduğu için özel bir mimari bileşen olarak ele alınmalıdır.
 
 ---
 
 ### 📝 Sonraki Adımlar
-- [x] Raporun son okuması ve yazım hataları kontrolü.
-- [ ] Şekil eklenecek untuma!!!!!
-- [ ] GitHub'a PDF formatında nihai raporun yüklenmesi.
+- [x] Rapor içeriği tamamlandı ve kontrol edildi.
+- [ ] **UNUTMA:** Vaka çalışmaları ve mimari görünümlere ait şekiller (Şekil 3 ve Şekil 5) repoya `images/` klasörü altına eklenecek ve linklenecek.
+- [ ] PDF formatına dönüştürülüp sisteme yüklenecek.
